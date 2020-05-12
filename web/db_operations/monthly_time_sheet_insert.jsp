@@ -40,7 +40,13 @@
                     db_connection obj = new db_connection();
                     Connection con = obj.getConnection();
                     Statement st = con.createStatement();
-
+                    Statement st1 = con.createStatement();
+                    Statement st2 = con.createStatement();
+                    Statement st3 = con.createStatement();
+                    Statement st4 = con.createStatement();
+                    Statement st5 = con.createStatement();
+                    Statement st6 = con.createStatement();
+                    
                     DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     Date dateobj = new Date();
@@ -84,14 +90,53 @@
                             al_active_emp_no.add(rs_get_active_emp_no.getString(1));
                         }
                         for (int i = 0; i < al_active_emp_no.size(); i++) {
-
+                            int no_of_worked_days = 0;
+                            int no_of_worked_sundays = 0;
+                            int no_of_worked_spldays = 0;
+                            int no_of_presented_days = 0;
+                            int no_of_absented_days = 0;
+                            int total_normal_ot_hours = 0;
                             ResultSet rs_check_allemp_data_enter = st.executeQuery("SELECT count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and intime between '" + start_date + "' and '" + end_date + "' and  NOT attendance_status='SUN_PRESENT' and NOT attendance_status='SPL_PRESENT'");
                             while (rs_check_allemp_data_enter.next()) {
                                 if (Integer.parseInt(no_working_day_in_month) <= Integer.parseInt(rs_check_allemp_data_enter.getString(1))) {
 
 
+                                    ResultSet rs_no_of_worked_days = st1.executeQuery("select count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='PRESENT' and intime between '" + start_date + "' and '" + end_date + "'");
+                                    while (rs_no_of_worked_days.next()) {
+                                        no_of_worked_days = Integer.parseInt(rs_no_of_worked_days.getString(1));
+                                    }
+
+
+                                    ResultSet rs_no_of_worked_sunday = st2.executeQuery("select count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='SUN_PRESENT' and intime between '" + start_date + "' and '" + end_date + "'");
+                                    while (rs_no_of_worked_sunday.next()) {
+                                        no_of_worked_sundays = Integer.parseInt(rs_no_of_worked_sunday.getString(1));
+                                    }
+
+                                    ResultSet rs_no_of_worked_splday = st3.executeQuery("select count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='SPL_PRESENT' and intime between '" + start_date + "' and '" + end_date + "'");
+                                    while (rs_no_of_worked_splday.next()) {
+                                        no_of_worked_spldays = Integer.parseInt(rs_no_of_worked_splday.getString(1));
+                                    }
+                                    no_of_presented_days = no_of_worked_days + no_of_worked_sundays + no_of_worked_spldays;
+
+                                    
+                                    
+                                    ResultSet rs_no_of_absented_day = st4.executeQuery("select count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='ABSENT' and intime between '" + start_date + "' and '" + end_date + "'");
+                                    while (rs_no_of_absented_day.next()) {
+                                        no_of_absented_days = Integer.parseInt(rs_no_of_absented_day.getString(1));
+                                    }
+                                    
+                                    ResultSet rs_total_normal_ot_hours = st5.executeQuery("select sum(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='ABSENT' and intime between '" + start_date + "' and '" + end_date + "'");
+                                    while (rs_total_normal_ot_hours.next()) {
+                                        total_normal_ot_hours = Integer.parseInt(rs_total_normal_ot_hours.getString(1));
+                                    }
+                                    
                                     out.println("<script type=\"text/javascript\">");
                                     out.println("alert('Daily Time Sheet All Data Inserted on " + al_active_emp_no.get(i) + "');");
+                                    out.println("alert('Presented days " + no_of_worked_days + "');");
+                                    out.println("alert('Presented Sundays " + no_of_worked_sundays + "');");
+                                    out.println("alert('Presented Spldays " + no_of_worked_spldays + "');");
+                                    out.println("alert('Total Presented days " + no_of_presented_days + "');");
+                                    out.println("alert('Absented days " + no_of_absented_days + "');");
                                     //out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
                                     out.println("</script>");
                                     out.print(rs_check_allemp_data_enter.getString(1));
