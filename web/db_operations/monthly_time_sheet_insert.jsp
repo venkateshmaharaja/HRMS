@@ -3,6 +3,7 @@
     Created on : Mar 26, 2020, 4:29:15 PM
     Author     : VENKATESH
 --%>
+<%@page import="java.text.DecimalFormat"%>
 <%@page import="java.util.Calendar"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.Date"%>
@@ -46,7 +47,7 @@
                     Statement st4 = con.createStatement();
                     Statement st5 = con.createStatement();
                     Statement st6 = con.createStatement();
-                    
+
                     DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     Date dateobj = new Date();
@@ -96,6 +97,7 @@
                             int no_of_presented_days = 0;
                             int no_of_absented_days = 0;
                             int total_normal_ot_hours = 0;
+                        //    String total_normal_ot_hours_decimal = "";
                             ResultSet rs_check_allemp_data_enter = st.executeQuery("SELECT count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and intime between '" + start_date + "' and '" + end_date + "' and  NOT attendance_status='SUN_PRESENT' and NOT attendance_status='SPL_PRESENT'");
                             while (rs_check_allemp_data_enter.next()) {
                                 if (Integer.parseInt(no_working_day_in_month) <= Integer.parseInt(rs_check_allemp_data_enter.getString(1))) {
@@ -118,18 +120,23 @@
                                     }
                                     no_of_presented_days = no_of_worked_days + no_of_worked_sundays + no_of_worked_spldays;
 
-                                    
-                                    
+
+
                                     ResultSet rs_no_of_absented_day = st4.executeQuery("select count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='ABSENT' and intime between '" + start_date + "' and '" + end_date + "'");
                                     while (rs_no_of_absented_day.next()) {
                                         no_of_absented_days = Integer.parseInt(rs_no_of_absented_day.getString(1));
                                     }
-                                    
-                                    ResultSet rs_total_normal_ot_hours = st5.executeQuery("select sum(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='ABSENT' and intime between '" + start_date + "' and '" + end_date + "'");
+
+                                    ResultSet rs_total_normal_ot_hours = st5.executeQuery("select sum(ot_hours) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='PRESENT' and intime between '" + start_date + "' and '" + end_date + "'");
                                     while (rs_total_normal_ot_hours.next()) {
                                         total_normal_ot_hours = Integer.parseInt(rs_total_normal_ot_hours.getString(1));
                                     }
-                                    
+                           /*         DecimalFormat decimal_fmt = new DecimalFormat("#.#");
+                                    total_normal_ot_hours_decimal = decimal_fmt.format(total_normal_ot_hours); */
+
+                                    DecimalFormat decimal_fmt = new DecimalFormat("#.#");
+                                    double total_normal_ot_hours_decimal = Double.valueOf(decimal_fmt.format(total_normal_ot_hours));
+
                                     out.println("<script type=\"text/javascript\">");
                                     out.println("alert('Daily Time Sheet All Data Inserted on " + al_active_emp_no.get(i) + "');");
                                     out.println("alert('Presented days " + no_of_worked_days + "');");
@@ -137,6 +144,7 @@
                                     out.println("alert('Presented Spldays " + no_of_worked_spldays + "');");
                                     out.println("alert('Total Presented days " + no_of_presented_days + "');");
                                     out.println("alert('Absented days " + no_of_absented_days + "');");
+                                    out.println("alert('Total Normal OT Hours " + total_normal_ot_hours_decimal + "');");
                                     //out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
                                     out.println("</script>");
                                     out.print(rs_check_allemp_data_enter.getString(1));
