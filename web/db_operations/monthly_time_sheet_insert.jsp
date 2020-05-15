@@ -82,6 +82,8 @@
                             Double total_sunday_ot_hours = 0.0;
                             Double total_splday_ot_hours = 0.0;
                             Double total_total_ot_hours = 0.0;
+                            int sun_p_count = 0;
+                            int spl_p_count = 0;
                             //    String total_normal_ot_hours_decimal = "";
                             ResultSet rs_check_allemp_data_enter = st.executeQuery("SELECT count(*) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and intime between '" + start_date + "' and '" + end_date + "' and  NOT attendance_status='SUN_PRESENT' and NOT attendance_status='SPL_PRESENT'");
                             while (rs_check_allemp_data_enter.next()) {
@@ -109,13 +111,24 @@
                                     }
                                     ResultSet rs_total_sunday_ot_hours = st6.executeQuery("select sum(ot_hours) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='SUN_PRESENT' and intime between '" + start_date + "' and '" + end_date + "'");
                                     while (rs_total_sunday_ot_hours.next()) {
+                                        sun_p_count++;
+                                    }
+                                    if (sun_p_count <= 0) {
+                                        total_splday_ot_hours = 0.0;
                                         total_sunday_ot_hours = Double.parseDouble(rs_total_sunday_ot_hours.getString(1));
                                     }
+
                                     ResultSet rs_total_splday_ot_hours = st7.executeQuery("select sum(ot_hours) from time_sheet where emp_id='" + al_active_emp_no.get(i) + "' and attendance_status='SPL_PRESENT' and intime between '" + start_date + "' and '" + end_date + "'");
                                     while (rs_total_splday_ot_hours.next()) {
+                                        spl_p_count++;
+                                    }
+                                    if (spl_p_count <= 0) {
+                                        total_splday_ot_hours = 0.0;
                                         total_splday_ot_hours = Double.parseDouble(rs_total_splday_ot_hours.getString(1));
-                                    } 
-//***START Normal OT Calculation with decimal points
+
+                                    }
+
+                                    //***START Normal OT Calculation with decimal points
                                     DecimalFormat decimal_fmt = new DecimalFormat("##.#");
                                     double total_normal_ot_hours_decimal = Double.valueOf(decimal_fmt.format(total_normal_ot_hours));
 
@@ -127,7 +140,6 @@
                                     Double final_normal_ot_hours = 0.00;
                                     int iend = str_normal_ot.indexOf(".");
                                     String left_cutted_value;
-
                                     if (iend != -1) {
                                         left_cutted_value = str_normal_ot.substring(0, iend);
                                         cal_decimal = ((Double.parseDouble(right_cutted_value) * 10) / 60);
@@ -159,7 +171,7 @@
 
 
 //***START SPL OT Calculation with decimal points
-                                    double total_splday_ot_hours_decimal = Double.valueOf(decimal_fmt.format(total_sunday_ot_hours));
+                                    double total_splday_ot_hours_decimal = Double.valueOf(decimal_fmt.format(total_splday_ot_hours));
 
                                     String str_splday_ot = Double.toString(total_splday_ot_hours_decimal);
                                     String spl_right_cutted_value = str_splday_ot.substring(str_splday_ot.length() - 1, str_splday_ot.length());
@@ -171,35 +183,60 @@
                                     String left_cutted_spl_value;
 
                                     if (iend2 != -1) {
-                                        left_cutted_spl_value = cut_spl_ot.substring(0, iend1);
+                                        left_cutted_spl_value = cut_spl_ot.substring(0, iend2);
                                         spl_cal_decimal = ((Double.parseDouble(spl_right_cutted_value) * 10) / 60);
                                         final_spl_ot_hours = (Double.parseDouble(left_cutted_spl_value) + spl_cal_decimal);
                                     }
 //***END SPL OT Calculation with decimal points
+                                    total_total_ot_hours = final_normal_ot_hours + final_spl_ot_hours + final_sun_ot_hours;
 
-
-                                    out.println("<script type=\"text/javascript\">");
-                                    out.println("alert('Daily Time Sheet All Data Inserted on " + al_active_emp_no.get(i) + "');");
-                                    out.println("alert('Presented days " + no_of_worked_days + "');");
-                                    out.println("alert('Presented Sundays " + no_of_worked_sundays + "');");
-                                    out.println("alert('Presented Spldays " + no_of_worked_spldays + "');");
-                                    out.println("alert('Total Presented days " + no_of_presented_days + "');");
-                                    out.println("alert('Absented days " + no_of_absented_days + "');");
-                                    out.println("alert('Total Normal OT Hours " + total_normal_ot_hours_decimal + "');");
-                                    out.println("alert('Finall Total Normal OT Hours " + decimal_fmt.format(final_normal_ot_hours) + "');");
-                                    out.println("alert('Total SUNDAY OT Hours " + total_sunday_ot_hours + "');");
-                                    out.println("alert('Finall Total SUNDAY OT Hours " + decimal_fmt.format(final_sun_ot_hours) + "');");
-                                    out.println("alert('Total SPLDAY OT Hours " + total_splday_ot_hours + "');");
-                                    out.println("alert('Finall Total SPLDAY OT Hours " + decimal_fmt.format(final_spl_ot_hours) + "');");
-                                    
-                                    //out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
-                                    out.println("</script>");
+                                    /*
+                                     * out.println("<script
+                                     * type=\"text/javascript\">");
+                                     * out.println("alert('Daily Time Sheet All
+                                     * Data Inserted on " +
+                                     * al_active_emp_no.get(i) + "');");
+                                     * out.println("alert('Presented days " +
+                                     * no_of_worked_days + "');");
+                                     * out.println("alert('Presented Sundays " +
+                                     * no_of_worked_sundays + "');");
+                                     * out.println("alert('Presented Spldays " +
+                                     * no_of_worked_spldays + "');");
+                                     * out.println("alert('Total Presented days
+                                     * " + no_of_presented_days + "');");
+                                     * out.println("alert('Absented days " +
+                                     * no_of_absented_days + "');");
+                                     * out.println("alert('Total Normal OT Hours
+                                     * " + total_normal_ot_hours_decimal +
+                                     * "');"); out.println("alert('Finall Total
+                                     * Normal OT Hours " +
+                                     * decimal_fmt.format(final_normal_ot_hours)
+                                     * + "');"); out.println("alert('Total
+                                     * SUNDAY OT Hours " + total_sunday_ot_hours
+                                     * + "');"); out.println("alert('Finall
+                                     * Total SUNDAY OT Hours " +
+                                     * decimal_fmt.format(final_sun_ot_hours) +
+                                     * "');"); out.println("alert('Total SPLDAY
+                                     * OT Hours " + total_splday_ot_hours +
+                                     * "');"); out.println("alert('Finall Total
+                                     * SPLDAY OT Hours " +
+                                     * decimal_fmt.format(final_spl_ot_hours) +
+                                     * "');"); out.println("alert('Finall Grand
+                                     * Total OT Hours " + total_total_ot_hours +
+                                     * "');"); out.println("alert('Finall Grand
+                                     * Total OT Hours " + total_total_ot_hours +
+                                     * "');");
+                                     *
+                                     * out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
+                                     * out.println("</script>");
                                     out.print(rs_check_allemp_data_enter.getString(1));
+                                     */
+
                                 } else {
                                     out.println("<script type=\"text/javascript\">");
                                     out.println("alert('Emp no " + al_active_emp_no.get(i) + " Please Fill all data');");
                                     //out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
-                                    out.print(rs_check_allemp_data_enter.getString(1));
+                                    //       out.print(rs_check_allemp_data_enter.getString(1));
                                     out.println("</script>");
                                 }
                             }
