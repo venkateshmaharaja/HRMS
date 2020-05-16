@@ -66,8 +66,8 @@
                         String start_date = sal_year + "-" + sal_month + "-01";
                         // String end_date = sal_year + "-" + sal_month + "-31";
                         String end_date = sal_year + "-" + sal_month + "-31";
-                        out.print(start_date);
-                        out.print(end_date);
+//                        out.print(start_date);
+//                        out.print(end_date);
                         ResultSet rs_get_active_emp_no = st.executeQuery("select emp_id from emp_details where emp_status='ACTIVE'");
                         while (rs_get_active_emp_no.next()) {
                             al_active_emp_no.add(rs_get_active_emp_no.getString(1));
@@ -147,8 +147,6 @@
                                     }
 //***END Normal OT Calculation with decimal points
 
-
-
 //***START SUNDAY OT Calculation with decimal points
                                     double total_sunday_ot_hours_decimal = Double.valueOf(decimal_fmt.format(total_sunday_ot_hours));
 
@@ -167,8 +165,6 @@
                                         final_sun_ot_hours = (Double.parseDouble(left_cutted_sun_value) + sun_cal_decimal);
                                     }
 //***END SUNDAY OT Calculation with decimal points
-
-
 
 //***START SPL OT Calculation with decimal points
                                     double total_splday_ot_hours_decimal = Double.valueOf(decimal_fmt.format(total_splday_ot_hours));
@@ -190,68 +186,56 @@
 //***END SPL OT Calculation with decimal points
                                     total_total_ot_hours = final_normal_ot_hours + final_spl_ot_hours + final_sun_ot_hours;
 
-                                    /*
-                                     * out.println("<script
-                                     * type=\"text/javascript\">");
-                                     * out.println("alert('Daily Time Sheet All
-                                     * Data Inserted on " +
-                                     * al_active_emp_no.get(i) + "');");
-                                     * out.println("alert('Presented days " +
-                                     * no_of_worked_days + "');");
-                                     * out.println("alert('Presented Sundays " +
-                                     * no_of_worked_sundays + "');");
-                                     * out.println("alert('Presented Spldays " +
-                                     * no_of_worked_spldays + "');");
-                                     * out.println("alert('Total Presented days
-                                     * " + no_of_presented_days + "');");
-                                     * out.println("alert('Absented days " +
-                                     * no_of_absented_days + "');");
-                                     * out.println("alert('Total Normal OT Hours
-                                     * " + total_normal_ot_hours_decimal +
-                                     * "');"); out.println("alert('Finall Total
-                                     * Normal OT Hours " +
-                                     * decimal_fmt.format(final_normal_ot_hours)
-                                     * + "');"); out.println("alert('Total
-                                     * SUNDAY OT Hours " + total_sunday_ot_hours
-                                     * + "');"); out.println("alert('Finall
-                                     * Total SUNDAY OT Hours " +
-                                     * decimal_fmt.format(final_sun_ot_hours) +
-                                     * "');"); out.println("alert('Total SPLDAY
-                                     * OT Hours " + total_splday_ot_hours +
-                                     * "');"); out.println("alert('Finall Total
-                                     * SPLDAY OT Hours " +
-                                     * decimal_fmt.format(final_spl_ot_hours) +
-                                     * "');"); out.println("alert('Finall Grand
-                                     * Total OT Hours " + total_total_ot_hours +
-                                     * "');"); out.println("alert('Finall Grand
-                                     * Total OT Hours " + total_total_ot_hours +
-                                     * "');");
-                                     *
-                                     * out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
-                                     * out.println("</script>");
-                                    out.print(rs_check_allemp_data_enter.getString(1));
-                                     */
+//                                    out.println("<script type =\"text/javascript\">");
+//                                    out.println("alert('Daily Time Sheet All Data Inserted on " + al_active_emp_no.get(i) + "');");
+//                                    out.println("alert('Presented days " + no_of_worked_days + "');");
+//                                    out.println("alert('Presented Sundays " + no_of_worked_sundays + "');");
+//                                    out.println("alert('Presented Spldays " + no_of_worked_spldays + "');");
+//                                    out.println("alert('Total Presented days" + no_of_presented_days + "');");
+//                                    out.println("alert('Absented days " + no_of_absented_days + "');");
+//                                    out.println("alert('Total Normal OT Hours " + total_normal_ot_hours_decimal + "');");
+//                                    out.println("alert('Finall Total Normal OT Hours " + decimal_fmt.format(final_normal_ot_hours) + "');");
+//                                    out.println("alert('Total SUNDAY OT Hours " + total_sunday_ot_hours + "');");
+//                                    out.println("alert('Finall  Total SUNDAY OT Hours " + decimal_fmt.format(final_sun_ot_hours) + "');");
+//                                    out.println("alert('Total SPLDAY   OT Hours " + total_splday_ot_hours + "');");
+//                                    out.println("alert('Finall Total   SPLDAY OT Hours " + decimal_fmt.format(final_spl_ot_hours) + "');");
+//                                    out.println("alert('Finall Grand    Total OT Hours " + decimal_fmt.format(total_total_ot_hours) + "');");
+//                                    out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
+//                                    out.println("</script>");
+//                                    out.print(rs_check_allemp_data_enter.getString(1));
+                                    PreparedStatement ps_insert_monthly_time_sheet = con.prepareStatement("INSERT INTO `time_sheet`(`emp_id`, `emp_name`, `emp_sal_type`, `attendance_status`, `intime`, `outtime`, `day`, `normal_working_hours`, `ot_hours`, `total_hours_working`, `salary_advance`, `remark`,`added_by`,`added_date`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                    ps_insert_monthly_time_sheet.setString(1, timesheet_emp_id);
+                                    ps.setString(2, timesheet_emp_name);
+                                    ps.setString(3, timesheet_emp_sal_type);
+                                    ps.setString(4, timesheet_attendance_status);
+                                    ps.setString(5, intime);
+                                    ps.setString(6, outtime);
+                                    ps.setString(7, timesheet_day);
+                                    ps.setString(8, timesheet_norm_workhours);
+                                    ps.setString(9, timesheet_ot_hours);
+                                    ps.setString(10, timesheet_total_worked_hours);
+                                    
 
-                                } else {
-                                    out.println("<script type=\"text/javascript\">");
-                                    out.println("alert('Emp no " + al_active_emp_no.get(i) + " Please Fill all data');");
-                                    //out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
-                                    //       out.print(rs_check_allemp_data_enter.getString(1));
-                                    out.println("</script>");
+                                    } else {
+                                        out.println("<script type=\"text/javascript\">");
+                                        out.println("alert('Emp no " + al_active_emp_no.get(i) + " Please Fill all data and Re-create the Monthly Time Sheet');");
+                                        out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
+                                        //       out.print(rs_check_allemp_data_enter.getString(1));
+                                        out.println("</script>");
+                                    }
                                 }
                             }
-                        }
-                        // ***START***         check the all emp data insert
-                    } else {
+                            // ***START***         check the all emp data insert
+                        }else {
                         out.println("<script type=\"text/javascript\">");
                         out.println("alert('Dont Put any Empty Data...');");
                         out.write("setTimeout(function(){window.location.href='../dashboard.jsp'},1);");
                         out.println("</script>");
                     }
-                } else {
-                    response.sendRedirect("index.jsp");
-                }
-            } catch (Exception ex) {
+                    } else {
+                        response.sendRedirect("index.jsp");
+                    }
+                }catch (Exception ex) {
                 out.print(ex.toString());
             }
         %>
